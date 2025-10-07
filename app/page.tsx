@@ -1,103 +1,195 @@
-import Image from "next/image";
+import Link from "next/link";
+import { BottomNav } from "@/components/bottom-nav";
+
+// 模拟妆容数据
+const makeupPosts = [
+  {
+    id: 1,
+    title: "日系清透感妆容",
+    description: "清新自然的日系妆容，展现真实之美",
+    image:
+      "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=800&q=80",
+    author: {
+      name: "美妆达人A",
+      avatar: "https://i.pravatar.cc/150?img=1",
+    },
+    likes: 1200,
+    views: 1234,
+    featured: true,
+  },
+  {
+    id: 2,
+    title: "夏日海边妆容",
+    description: "清爽活力的夏日妆容",
+    image:
+      "https://images.unsplash.com/photo-1515688594390-b649af70d282?w=600&q=80",
+    author: {
+      name: "美妆达人A",
+      avatar: "https://i.pravatar.cc/150?img=1",
+    },
+    likes: 345,
+  },
+  {
+    id: 3,
+    title: "晚间约会妆容",
+    description: "浪漫温柔的约会妆",
+    image:
+      "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=600&q=80",
+    author: {
+      name: "化妆师B",
+      avatar: "https://i.pravatar.cc/150?img=2",
+    },
+    likes: 678,
+  },
+  {
+    id: 4,
+    title: "清新日常妆容",
+    description: "适合每天的自然妆",
+    image:
+      "https://images.unsplash.com/photo-1524502397800-2eeaad7c3fe5?w=600&q=80",
+    author: {
+      name: "小红",
+      avatar: "https://i.pravatar.cc/150?img=3",
+    },
+    likes: 912,
+  },
+  {
+    id: 5,
+    title: "活力运动妆容",
+    description: "持久不脱的运动妆",
+    image:
+      "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=600&q=80",
+    author: {
+      name: "美妆达人A",
+      avatar: "https://i.pravatar.cc/150?img=1",
+    },
+    likes: 1100,
+  },
+  {
+    id: 6,
+    title: "温柔约会妆容",
+    description: "展现温柔气质",
+    image:
+      "https://images.unsplash.com/photo-1499310392430-c4b28c6b6b53?w=600&q=80",
+    author: {
+      name: "化妆师B",
+      avatar: "https://i.pravatar.cc/150?img=2",
+    },
+    likes: 2300,
+  },
+];
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const featuredPost = makeupPosts.find((post) => post.featured);
+  const regularPosts = makeupPosts.filter((post) => !post.featured);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+  return (
+    <div className="flex flex-col min-h-screen justify-between">
+      <main className="flex-grow">
+        {/* 头部导航 */}
+        <header className="sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm z-10 px-4 pt-4">
+          <div className="flex items-center justify-between">
+            <Link
+              href="/search"
+              className="flex items-center gap-2 bg-surface-light dark:bg-surface-dark py-2 px-4 rounded-full shadow-sm text-content-light dark:text-content-dark active:scale-95 transition-transform"
+            >
+              <span className="material-symbols-outlined text-subtle-light dark:text-subtle-dark">
+                search
+              </span>
+              <span className="text-sm">搜索</span>
+            </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/" className="text-primary font-bold">
+                推荐
+              </Link>
+              <Link
+                href="/following"
+                className="text-subtle-light dark:text-subtle-dark"
+              >
+                关注
+              </Link>
+            </div>
+            <Link
+              href="/notifications"
+              className="relative p-2 text-content-light dark:text-content-dark"
+            >
+              <span className="material-symbols-outlined">notifications</span>
+              <div className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></div>
+            </Link>
+          </div>
+        </header>
+
+        {/* 特色妆容 */}
+        {featuredPost && (
+          <section className="px-4 py-5">
+            <Link
+              href={`/makeup/${featuredPost.id}`}
+              className="group block bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm overflow-hidden transition-all duration-200 ease-in-out"
+            >
+              <div
+                className="w-full bg-center bg-no-repeat aspect-video bg-cover"
+                style={{ backgroundImage: `url('${featuredPost.image}')` }}
+              />
+              <div className="p-4">
+                <p className="text-lg font-bold text-content-light dark:text-content-dark">
+                  {featuredPost.title}
+                </p>
+                <p className="text-subtle-light dark:text-subtle-dark text-sm mt-1">
+                  {featuredPost.description}
+                </p>
+                <div className="flex items-center justify-between text-xs mt-2 text-subtle-light dark:text-subtle-dark">
+                  <span>{featuredPost.views}人已学</span>
+                  <div className="flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm">
+                      favorite_border
+                    </span>
+                    <span>{featuredPost.likes}</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </section>
+        )}
+
+        {/* 妆容瀑布流 */}
+        <section className="px-4 py-5">
+          <div className="grid grid-cols-2 gap-4">
+            {regularPosts.map((post) => (
+              <Link
+                key={post.id}
+                href={`/makeup/${post.id}`}
+                className="group flex flex-col gap-2 transition-all duration-200 ease-in-out"
+              >
+                <div
+                  className="w-full bg-center bg-no-repeat aspect-[4/5] bg-cover rounded-lg"
+                  style={{ backgroundImage: `url('${post.image}')` }}
+                />
+                <p className="text-content-light dark:text-content-dark text-sm font-medium">
+                  {post.title}
+                </p>
+                <div className="flex items-center text-xs text-subtle-light dark:text-subtle-dark gap-2">
+                  <div className="flex items-center gap-1">
+                    <img
+                      className="w-4 h-4 rounded-full object-cover"
+                      src={post.author.avatar}
+                      alt={post.author.name}
+                    />
+                    <span>{post.author.name}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm">
+                      favorite_border
+                    </span>
+                    <span>{post.likes}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      <BottomNav />
     </div>
   );
 }
