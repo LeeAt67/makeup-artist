@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { BottomNav } from "@/components/bottom-nav";
 import { createClient } from "@/lib/supabase/server";
-import { logout } from "@/lib/actions/auth";
 import { redirect } from "next/navigation";
+import { getUserPosts } from "@/lib/actions/social";
 
 const quickActions = [
   { id: 1, icon: "history", label: "历史记录", href: "/profile/history" },
@@ -12,35 +12,8 @@ const quickActions = [
     label: "我的收藏",
     href: "/profile/favorites",
   },
-  { id: 3, icon: "browse", label: "浏览记录", href: "/profile/browse" },
-];
-
-const userPosts = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=600&q=80",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1515688594390-b649af70d282?w=600&q=80",
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=600&q=80",
-  },
-  {
-    id: 4,
-    image:
-      "https://images.unsplash.com/photo-1524502397800-2eeaad7c3fe5?w=600&q=80",
-  },
-  {
-    id: 5,
-    image:
-      "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=600&q=80",
-  },
+  { id: 3, icon: "people", label: "我的关注", href: "#following" },
+  { id: 4, icon: "group", label: "我的粉丝", href: "#followers" },
 ];
 
 export default async function ProfilePage() {
@@ -71,7 +44,14 @@ export default async function ProfilePage() {
         username
       )}&background=f04299&color=fff`,
     username: username,
+    followersCount: profile?.followers_count || 0,
+    followingCount: profile?.following_count || 0,
+    postsCount: profile?.posts_count || 0,
   };
+
+  // 获取用户的帖子
+  const postsResult = await getUserPosts(user.id, 20);
+  const userPosts = postsResult.success ? postsResult.data : [];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -115,35 +95,60 @@ export default async function ProfilePage() {
             </Link>
           </div>
 
+          {/* 统计数据 */}
+          <div className="mt-4 flex items-center justify-around text-center bg-gray-50 dark:bg-gray-800/30 rounded-xl p-4">
+            <div className="flex flex-col">
+              <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                {userData.postsCount}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                帖子
+              </span>
+            </div>
+            <Link
+              href={`/profile/${user.id}/followers`}
+              className="flex flex-col hover:opacity-70 transition-opacity"
+            >
+              <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                {userData.followersCount}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                粉丝
+              </span>
+            </Link>
+            <Link
+              href={`/profile/${user.id}/following`}
+              className="flex flex-col hover:opacity-70 transition-opacity"
+            >
+              <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                {userData.followingCount}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                关注
+              </span>
+            </Link>
+          </div>
+
           {/* 快捷操作 */}
-          <div className="mt-6 grid grid-cols-3 gap-4 text-center">
+          <div className="mt-6 grid grid-cols-4 gap-3 text-center">
             {quickActions.map((action) => (
               <Link
                 key={action.id}
-                href={action.href}
+                href={
+                  action.href.startsWith("#")
+                    ? `/profile/${user.id}${action.href.replace("#", "/")}`
+                    : action.href
+                }
                 className="flex flex-col items-center gap-2 p-3 bg-gray-100 dark:bg-gray-800/50 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700/50 transition-colors"
               >
-                <span className="material-symbols-outlined text-3xl text-primary">
+                <span className="material-symbols-outlined text-2xl text-primary">
                   {action.icon}
                 </span>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
                   {action.label}
                 </span>
               </Link>
             ))}
-          </div>
-
-          {/* 登出按钮 */}
-          <div className="mt-6">
-            <form action={logout}>
-              <button
-                type="submit"
-                className="w-full flex items-center justify-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-red-600 dark:text-red-400 font-medium"
-              >
-                <span className="material-symbols-outlined">logout</span>
-                <span>退出登录</span>
-              </button>
-            </form>
           </div>
         </div>
 
@@ -186,9 +191,26 @@ export default async function ProfilePage() {
               <Link
                 key={post.id}
                 href={`/makeup/${post.id}`}
-                className="aspect-square bg-cover bg-center rounded-lg hover:opacity-90 transition-opacity"
-                style={{ backgroundImage: `url('${post.image}')` }}
-              />
+                className="aspect-square bg-cover bg-center rounded-lg hover:opacity-90 transition-opacity relative group overflow-hidden"
+                style={{ backgroundImage: `url('${post.cover_image}')` }}
+              >
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <div className="flex items-center gap-4 text-white text-sm">
+                    <div className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-base">
+                        favorite
+                      </span>
+                      <span>{post.likes_count}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-base">
+                        visibility
+                      </span>
+                      <span>{post.views_count}</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </section>

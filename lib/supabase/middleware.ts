@@ -10,10 +10,18 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+  // 检查环境变量是否存在
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error("Missing Supabase environment variables");
+    // 如果环境变量缺失，允许请求继续，但没有用户
+    return { supabaseResponse, user: null };
+  }
+
+  try {
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll();
@@ -28,14 +36,18 @@ export async function updateSession(request: NextRequest) {
           });
         },
       },
-    }
-  );
+    });
 
-  // 刷新 session
-  // 这将自动处理 token 刷新
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    // 刷新 session
+    // 这将自动处理 token 刷新
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  return { supabaseResponse, user };
+    return { supabaseResponse, user };
+  } catch (error) {
+    console.error("Error in updateSession:", error);
+    // 如果出错，允许请求继续，但没有用户
+    return { supabaseResponse, user: null };
+  }
 }

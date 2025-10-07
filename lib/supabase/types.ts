@@ -39,6 +39,9 @@ export interface Database {
             | "heart"
             | "diamond"
             | null;
+          followers_count: number;
+          following_count: number;
+          posts_count: number;
         };
         Insert: {
           id: string;
@@ -57,6 +60,9 @@ export interface Database {
             | "heart"
             | "diamond"
             | null;
+          followers_count?: number;
+          following_count?: number;
+          posts_count?: number;
         };
         Update: {
           id?: string;
@@ -75,6 +81,9 @@ export interface Database {
             | "heart"
             | "diamond"
             | null;
+          followers_count?: number;
+          following_count?: number;
+          posts_count?: number;
         };
       };
       // 妆容表
@@ -192,6 +201,135 @@ export interface Database {
             | "diamond";
           confidence?: number;
           is_manually_adjusted?: boolean;
+        };
+      };
+      // 妆容帖子表
+      makeup_posts: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          description: string | null;
+          content: string | null;
+          cover_image: string;
+          images: string[] | null;
+          video_url: string | null;
+          category: string;
+          face_shape: string | null;
+          tags: string[] | null;
+          likes_count: number;
+          views_count: number;
+          comments_count: number;
+          favorites_count: number;
+          is_featured: boolean;
+          status: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title: string;
+          description?: string | null;
+          content?: string | null;
+          cover_image: string;
+          images?: string[] | null;
+          video_url?: string | null;
+          category?: string;
+          face_shape?: string | null;
+          tags?: string[] | null;
+          likes_count?: number;
+          views_count?: number;
+          comments_count?: number;
+          favorites_count?: number;
+          is_featured?: boolean;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          description?: string | null;
+          content?: string | null;
+          cover_image?: string;
+          images?: string[] | null;
+          video_url?: string | null;
+          category?: string;
+          face_shape?: string | null;
+          tags?: string[] | null;
+          likes_count?: number;
+          views_count?: number;
+          comments_count?: number;
+          favorites_count?: number;
+          is_featured?: boolean;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      // 妆容点赞表
+      makeup_likes: {
+        Row: {
+          id: string;
+          user_id: string;
+          post_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          post_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          post_id?: string;
+          created_at?: string;
+        };
+      };
+      // 妆容收藏表
+      makeup_favorites: {
+        Row: {
+          id: string;
+          user_id: string;
+          post_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          post_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          post_id?: string;
+          created_at?: string;
+        };
+      };
+      // 用户关注表
+      user_follows: {
+        Row: {
+          id: string;
+          follower_id: string;
+          following_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          follower_id: string;
+          following_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          follower_id?: string;
+          following_id?: string;
+          created_at?: string;
         };
       };
     };

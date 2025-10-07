@@ -9,16 +9,29 @@ import { updateSession } from "@/lib/supabase/middleware";
 export async function middleware(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request);
 
-  // 定义公开路由（不需要登录）
-  const publicRoutes = ["/login", "/register", "/forgot-password", "/auth"];
+  // 定义公开路由（不需要登录就可以访问）
+  const publicRoutes = [
+    "/",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/auth",
+    "/shop",
+    "/search",
+    "/makeup",
+    "/test-db",
+  ];
 
-  // 检查当前路径是否为公开路由
-  const isPublicRoute = publicRoutes.some((route) =>
+  // 定义需要登录的路由
+  const protectedRoutes = ["/profile", "/messages", "/scan"];
+
+  // 检查当前路径是否为需要登录的路由
+  const isProtectedRoute = protectedRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   );
 
-  // 如果用户未登录且访问的不是公开路由，重定向到登录页
-  if (!user && !isPublicRoute) {
+  // 如果用户未登录且访问需要登录的路由，重定向到登录页
+  if (!user && isProtectedRoute) {
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set("redirect", request.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);

@@ -35,7 +35,7 @@ create table if not exists profiles (
 create table if not exists face_scans (
   id uuid default uuid_generate_v4() primary key,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  user_id uuid references auth.users on delete cascade not null,
+  user_id uuid references public.profiles(id) on delete cascade not null,
   image_url text not null,
   face_shape text check (face_shape in ('round', 'square', 'oval', 'long', 'heart', 'diamond')) not null,
   confidence numeric(3,2) not null,

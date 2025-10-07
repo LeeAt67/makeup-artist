@@ -360,6 +360,7 @@ npm run lint
 - `/messages` - 消息通知
 - `/profile` - 个人中心
 - `/profile/edit` - 编辑资料
+- `/settings` - 设置页面（包含退出登录功能）
 
 ## 🔧 开发规范
 
@@ -398,6 +399,13 @@ npm run lint
 - [x] 评论系统 - ✅ 已完成
 - [x] 产品数据库和管理 - ✅ 已完成
 - [x] Zustand 状态管理 - ✅ 已完成
+- [x] 社交功能模块 - ✅ 已完成
+  - [x] 点赞妆容帖子
+  - [x] 收藏妆容帖子
+  - [x] 关注/取关用户
+  - [x] 用户主页展示
+  - [x] 关注/粉丝列表
+  - [x] 收藏列表
 - [ ] AI 脸型识别 API 对接（目前使用模拟数据）
 - [ ] 虚拟试妆功能（需要 AR 技术支持）
 
@@ -888,6 +896,88 @@ function Component() {
   return <div>...</div>;
 }
 ```
+
+### 社交功能系统 ⭐ 新增
+
+项目已实现完整的社交功能系统，包括：
+
+#### 功能列表
+
+- ✅ 点赞妆容帖子
+- ✅ 收藏妆容帖子  
+- ✅ 关注/取关用户
+- ✅ 用户主页展示
+- ✅ 关注列表查看
+- ✅ 粉丝列表查看
+- ✅ 收藏列表查看
+- ✅ 实时统计数据（点赞数、收藏数、关注数、粉丝数、帖子数）
+
+#### 数据库设置
+
+在 Supabase SQL Editor 中执行 `database/supabase-social-system.sql` 脚本创建社交功能表。
+
+#### 使用 Server Actions
+
+```typescript
+import {
+  // 点赞相关
+  likeMakeupPost,
+  unlikeMakeupPost,
+  checkIsLiked,
+  
+  // 收藏相关
+  favoriteMakeupPost,
+  unfavoriteMakeupPost,
+  checkIsFavorited,
+  getUserFavorites,
+  
+  // 关注相关
+  followUser,
+  unfollowUser,
+  checkIsFollowing,
+  getUserFollowing,
+  getUserFollowers,
+  
+  // 用户资料
+  getUserProfile,
+  getUserPosts,
+} from "@/lib/actions/social";
+
+// 点赞帖子
+await likeMakeupPost(postId);
+
+// 收藏帖子
+await favoriteMakeupPost(postId);
+
+// 关注用户
+await followUser(userId);
+
+// 获取收藏列表
+const result = await getUserFavorites(50);
+
+// 获取关注列表
+const following = await getUserFollowing(userId, 50);
+
+// 获取粉丝列表
+const followers = await getUserFollowers(userId, 50);
+```
+
+#### 页面访问
+
+- `/profile/[id]` - 用户主页
+- `/profile/[id]/following` - 关注列表
+- `/profile/[id]/followers` - 粉丝列表
+- `/profile/favorites` - 我的收藏
+
+#### 自动更新机制
+
+所有计数字段通过数据库触发器自动维护：
+- 点赞时自动更新 `makeup_posts.likes_count`
+- 收藏时自动更新 `makeup_posts.favorites_count`
+- 关注时自动更新 `profiles.followers_count` 和 `profiles.following_count`
+- 发帖时自动更新 `profiles.posts_count`
+
+详细文档请查看：[社交功能使用指南](./docs/社交功能使用指南.md)
 
 ## 🔍 数据库状态检查
 
