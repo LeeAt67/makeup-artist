@@ -58,26 +58,51 @@ makeup-artist/
 ├── app/                    # Next.js App Router 页面
 │   ├── layout.tsx         # 根布局
 │   ├── page.tsx           # 首页（妆容推荐瀑布流）
+│   ├── makeup/[id]/       # 妆容详情页
+│   ├── search/            # 搜索页面
 │   ├── shop/              # 商城页面
+│   │   └── product/[id]/  # 产品详情页
 │   ├── profile/           # 个人中心
+│   │   └── edit/          # 编辑资料
 │   ├── messages/          # 消息页面
 │   ├── scan/              # 脸型识别上传页面
+│   ├── auth/              # 认证相关页面
+│   ├── test-db/           # 数据库检查工具
 │   └── globals.css        # 全局样式
 ├── components/            # 公共组件
 │   └── bottom-nav.tsx     # 底部导航栏
 ├── lib/                   # 工具库
+│   ├── actions/           # Server Actions
+│   │   ├── auth.ts        # 认证操作
+│   │   ├── makeup.ts      # 妆容操作
+│   │   ├── comments.ts    # 评论操作
+│   │   ├── products.ts    # 产品操作
+│   │   ├── search.ts      # 搜索操作
+│   │   └── face-scan.ts   # 脸型识别操作
 │   ├── supabase/          # Supabase 配置
 │   │   ├── client.ts      # 浏览器端客户端
 │   │   ├── server.ts      # 服务端客户端
 │   │   ├── middleware.ts  # 中间件客户端
 │   │   └── types.ts       # 数据库类型定义
-│   └── stores/            # Zustand 状态管理
-│       ├── types.ts
-│       └── useAppStore.ts
+│   ├── stores/            # Zustand 状态管理
+│   │   ├── types.ts
+│   │   └── useAppStore.ts
+│   └── constants/         # 常量定义
+│       └── face-shapes.ts # 脸型常量
+├── database/              # 数据库 SQL 脚本 📦
+│   ├── README.md          # 脚本使用说明
+│   ├── supabase-setup.sql
+│   ├── supabase-makeup-posts.sql
+│   ├── supabase-comments-system.sql
+│   ├── supabase-products-system.sql
+│   ├── supabase-rpc-functions.sql
+│   └── ... 其他脚本
 ├── middleware.ts          # Next.js 中间件（处理认证）
 ├── docs/                  # 文档
 │   ├── prd.md            # 产品需求文档
-│   └── 项目架构.md       # 项目架构文档
+│   ├── 项目架构.md       # 项目架构文档
+│   ├── 脸型识别功能.md   # 脸型识别文档
+│   └── 虚拟试妆功能实现指南.md
 └── public/               # 静态资源
 ```
 
@@ -122,17 +147,18 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=你的匿名公钥
 
 在 Supabase Dashboard 中，点击左侧菜单的 "SQL Editor"，按顺序执行以下脚本：
 
-1. **基础表结构**：复制并执行 `supabase-setup.sql`
-2. **妆容帖子表**：复制并执行 `supabase-makeup-posts.sql`
-3. **评论系统表**：复制并执行 `supabase-comments-system.sql`
-4. **产品系统表**：复制并执行 `supabase-products-system.sql`
-5. **RPC 函数**：复制并执行 `supabase-rpc-functions.sql`
-6. **示例数据**：编辑并执行 `supabase-insert-sample-data.sql`（需替换用户 UUID）
+1. **基础表结构**：复制并执行 `database/supabase-setup.sql`
+2. **妆容帖子表**：复制并执行 `database/supabase-makeup-posts.sql`
+3. **评论系统表**：复制并执行 `database/supabase-comments-system.sql`
+4. **产品系统表**：复制并执行 `database/supabase-products-system.sql`
+5. **RPC 函数**：复制并执行 `database/supabase-rpc-functions.sql`
+6. **示例数据**：编辑并执行 `database/supabase-insert-sample-data.sql`（需替换用户 UUID）
 
 **注意**：
 
 - 必须按顺序执行，因为有表之间的依赖关系
-- 如果遇到外键错误，请参考 `supabase-fix-makeup-posts-fk.sql` 修复脚本
+- 如果遇到外键错误，请参考修复脚本
+- 📖 详细说明请查看 [数据库脚本使用指南](./database/README.md)
 
 或者手动执行以下 SQL 创建数据表：
 
@@ -716,7 +742,7 @@ async function recognizeFace(imageUrl: string) {
 
 #### 数据库设置
 
-在 Supabase SQL Editor 中执行 `supabase-comments-system.sql` 脚本创建评论表。
+在 Supabase SQL Editor 中执行 `database/supabase-comments-system.sql` 脚本创建评论表。
 
 #### 使用 Server Actions
 
@@ -791,7 +817,7 @@ const suggestions = await getSearchSuggestions("日系");
 
 #### 数据库设置
 
-在 Supabase SQL Editor 中执行 `supabase-products-system.sql` 脚本创建产品表。
+在 Supabase SQL Editor 中执行 `database/supabase-products-system.sql` 脚本创建产品表。
 
 #### 使用 Server Actions
 
@@ -890,7 +916,7 @@ function Component() {
 
 **问题描述**：在查询 `makeup_posts` 表时出现外键关系找不到的错误。
 
-**修复方法**：在 Supabase SQL Editor 中执行 `supabase-fix-makeup-posts-fk.sql` 脚本。
+**修复方法**：在 Supabase SQL Editor 中执行 `database/supabase-fix-makeup-posts-fk.sql` 脚本。
 
 详细信息请查看：[修复 makeup_posts 外键问题](./docs/修复makeup_posts外键问题.md)
 
@@ -910,6 +936,46 @@ function Component() {
 2. 确保已执行 `supabase-makeup-posts.sql` 脚本
 3. 执行 `supabase-insert-sample-data.sql` 添加示例数据
 4. 检查 URL 中的 ID 是否正确
+
+### 3. 评论系统外键关系错误
+
+**问题描述**：创建评论时提示 "Could not find a relationship between 'makeup_comments' and 'user_id'"。
+
+**错误信息：**
+
+```
+code: 'PGRST200'
+message: "Could not find a relationship between 'makeup_comments' and 'user_id' in the schema cache"
+```
+
+**原因**：评论表的 `user_id` 字段错误地引用了 `auth.users` 而不是 `public.profiles`。
+
+**解决方法：**
+
+1. 在 Supabase SQL Editor 中执行 `database/supabase-fix-comments-fk.sql` 修复脚本
+2. 该脚本会删除并重新创建评论表，使用正确的外键引用
+3. ⚠️ **注意**：执行此脚本会删除所有现有评论数据
+
+**预防措施：**
+
+- 新项目请直接使用更新后的 `database/supabase-comments-system.sql` 脚本（已修复）
+
+### 4. 获取评论列表失败
+
+**问题描述**：访问妆容详情页时提示 "获取评论列表失败"。
+
+**可能原因：**
+
+- `makeup_comments` 表未创建
+- 表关联查询语法问题
+
+**解决方法：**
+
+1. 访问 `/test-db/check-tables` 检查 `makeup_comments` 表是否存在
+2. 如果不存在，执行 `database/supabase-comments-system.sql` 创建表
+3. 如果存在但仍有错误，执行 `database/supabase-fix-comments-fk.sql` 修复外键
+
+**代码已优化**：评论查询已改为分步查询，更稳定可靠
 
 ## 🤝 贡献
 

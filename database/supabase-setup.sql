@@ -24,31 +24,12 @@ create table if not exists profiles (
   face_shape text check (face_shape in ('round', 'square', 'oval', 'long', 'heart', 'diamond'))
 );
 
--- 妆容表
-create table if not exists makeups (
-  id uuid default uuid_generate_v4() primary key,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  title text not null,
-  description text,
-  image_url text not null,
-  video_url text,
-  face_shapes text[] default '{}',
-  scenes text[] default '{}',
-  difficulty text check (difficulty in ('beginner', 'intermediate', 'advanced')) default 'beginner',
-  likes_count integer default 0,
-  views_count integer default 0,
-  author_id uuid references auth.users on delete cascade not null
-);
-
--- 收藏表
-create table if not exists favorites (
-  id uuid default uuid_generate_v4() primary key,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  user_id uuid references auth.users on delete cascade not null,
-  makeup_id uuid references makeups on delete cascade not null,
-  unique(user_id, makeup_id)
-);
+-- =====================================================
+-- 注意：妆容表和收藏表已移至 supabase-makeup-posts.sql
+-- =====================================================
+-- 旧版 makeups 表已弃用，请使用 makeup_posts 表
+-- 旧版 favorites 表已弃用，请使用 makeup_favorites 表
+-- =====================================================
 
 -- 脸型识别历史记录表
 create table if not exists face_scans (
@@ -67,8 +48,6 @@ create table if not exists face_scans (
 
 -- 启用 RLS
 alter table profiles enable row level security;
-alter table makeups enable row level security;
-alter table favorites enable row level security;
 alter table face_scans enable row level security;
 
 -- 用户资料表的 RLS 策略
@@ -84,35 +63,7 @@ create policy "用户注册时自动创建资料"
   on profiles for insert 
   with check (auth.uid() = id);
 
--- 妆容表的 RLS 策略
-create policy "所有人可以查看妆容" 
-  on makeups for select 
-  using (true);
-
-create policy "认证用户可以创建妆容" 
-  on makeups for insert 
-  with check (auth.uid() = author_id);
-
-create policy "作者可以更新自己的妆容" 
-  on makeups for update 
-  using (auth.uid() = author_id);
-
-create policy "作者可以删除自己的妆容" 
-  on makeups for delete 
-  using (auth.uid() = author_id);
-
--- 收藏表的 RLS 策略
-create policy "用户可以查看自己的收藏" 
-  on favorites for select 
-  using (auth.uid() = user_id);
-
-create policy "用户可以添加收藏" 
-  on favorites for insert 
-  with check (auth.uid() = user_id);
-
-create policy "用户可以删除自己的收藏" 
-  on favorites for delete 
-  using (auth.uid() = user_id);
+-- 妆容表和收藏表的 RLS 策略已移至 supabase-makeup-posts.sql
 
 -- 脸型识别历史记录表的 RLS 策略
 create policy "用户可以查看自己的识别记录" 

@@ -6,7 +6,7 @@
 CREATE TABLE IF NOT EXISTS public.makeup_comments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   post_id UUID NOT NULL REFERENCES public.makeup_posts(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   
   -- 评论内容
   content TEXT NOT NULL CHECK (length(content) <= 500),
@@ -100,7 +100,7 @@ CREATE TRIGGER trigger_update_post_comments_count
 
 CREATE TABLE IF NOT EXISTS public.comment_likes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   comment_id UUID NOT NULL REFERENCES public.makeup_comments(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   

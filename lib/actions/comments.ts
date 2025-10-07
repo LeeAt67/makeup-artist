@@ -33,18 +33,10 @@ export async function getComments(postId: string, limit = 50) {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
+    // 首先查询评论
+    const { data: comments, error } = await (supabase as any)
       .from("makeup_comments")
-      .select(
-        `
-        *,
-        profiles:user_id (
-          id,
-          username,
-          avatar_url
-        )
-      `
-      )
+      .select("*")
       .eq("post_id", postId)
       .is("parent_id", null)
       .order("created_at", { ascending: false })
@@ -52,16 +44,40 @@ export async function getComments(postId: string, limit = 50) {
 
     if (error) {
       console.error("获取评论列表失败:", error);
+      console.error("错误详情:", JSON.stringify(error, null, 2));
       return {
         success: false,
-        error: error.message,
+        error:
+          error.message ||
+          "数据库查询失败，请确保已执行 database/supabase-comments-system.sql 脚本创建评论表",
         data: [],
       };
     }
 
+    if (!comments || comments.length === 0) {
+      return {
+        success: true,
+        data: [],
+      };
+    }
+
+    // 获取所有评论作者的用户信息
+    const userIds = [...new Set(comments.map((c: any) => c.user_id))];
+    const { data: profiles } = await (supabase as any)
+      .from("profiles")
+      .select("id, username, avatar_url")
+      .in("id", userIds);
+
+    // 组合数据
+    const profilesMap = new Map(profiles?.map((p: any) => [p.id, p]) || []);
+    const commentsWithProfiles = comments.map((comment: any) => ({
+      ...comment,
+      profiles: profilesMap.get(comment.user_id) || null,
+    }));
+
     return {
       success: true,
-      data: data as Comment[],
+      data: commentsWithProfiles as Comment[],
     };
   } catch (error) {
     console.error("获取评论列表异常:", error);
@@ -81,18 +97,10 @@ export async function getReplies(parentId: string) {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
+    // 查询回复
+    const { data: replies, error } = await (supabase as any)
       .from("makeup_comments")
-      .select(
-        `
-        *,
-        profiles:user_id (
-          id,
-          username,
-          avatar_url
-        )
-      `
-      )
+      .select("*")
       .eq("parent_id", parentId)
       .order("created_at", { ascending: true });
 
@@ -105,9 +113,30 @@ export async function getReplies(parentId: string) {
       };
     }
 
+    if (!replies || replies.length === 0) {
+      return {
+        success: true,
+        data: [],
+      };
+    }
+
+    // 获取所有回复作者的用户信息
+    const userIds = [...new Set(replies.map((r: any) => r.user_id))];
+    const { data: profiles } = await (supabase as any)
+      .from("profiles")
+      .select("id, username, avatar_url")
+      .in("id", userIds);
+
+    // 组合数据
+    const profilesMap = new Map(profiles?.map((p: any) => [p.id, p]) || []);
+    const repliesWithProfiles = replies.map((reply: any) => ({
+      ...reply,
+      profiles: profilesMap.get(reply.user_id) || null,
+    }));
+
     return {
       success: true,
-      data: data as Comment[],
+      data: repliesWithProfiles as Comment[],
     };
   } catch (error) {
     console.error("获取回复列表异常:", error);
@@ -160,37 +189,43 @@ export async function createComment(
     }
 
     // 插入评论
-    const { data, error } = await supabase
+    const { data: newComment, error } = await (supabase as any)
       .from("makeup_comments")
-      .insert({
-        post_id: postId,
-        user_id: user.id,
-        content: content.trim(),
-        parent_id: parentId || null,
-      })
-      .select(
-        `
-        *,
-        profiles:user_id (
-          id,
-          username,
-          avatar_url
-        )
-      `
-      )
+      .insert([
+        {
+          post_id: postId,
+          user_id: user.id,
+          content: content.trim(),
+          parent_id: parentId || null,
+        },
+      ])
+      .select()
       .single();
 
     if (error) {
       console.error("创建评论失败:", error);
+      console.error("错误详情:", JSON.stringify(error, null, 2));
       return {
         success: false,
-        error: error.message,
+        error:
+          error.message ||
+          "创建评论失败，请确保已执行 database/supabase-comments-system.sql 脚本",
       };
     }
 
+    // 获取用户信息
+    const { data: profile } = await (supabase as any)
+      .from("profiles")
+      .select("id, username, avatar_url")
+      .eq("id", user.id)
+      .single();
+
     return {
       success: true,
-      data: data as Comment,
+      data: {
+        ...newComment,
+        profiles: profile,
+      } as Comment,
     };
   } catch (error) {
     console.error("创建评论异常:", error);
