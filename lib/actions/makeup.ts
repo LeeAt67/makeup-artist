@@ -241,16 +241,18 @@ export async function incrementViewCount(postId: string) {
   try {
     const supabase = await createClient();
 
-    const { error } = await supabase.rpc("increment_view_count", {
-      post_id: postId,
-    });
+    // 获取当前浏览数并更新
+    const { data: currentPost } = await (supabase as any)
+      .from("makeup_posts")
+      .select("views_count")
+      .eq("id", postId)
+      .maybeSingle();
 
-    if (error) {
-      console.error("增加浏览数失败:", error);
-      return {
-        success: false,
-        error: error.message,
-      };
+    if (currentPost) {
+      await (supabase as any)
+        .from("makeup_posts")
+        .update({ views_count: (currentPost.views_count || 0) + 1 })
+        .eq("id", postId);
     }
 
     return {
@@ -313,10 +315,12 @@ export async function toggleLike(postId: string) {
       };
     } else {
       // 添加点赞
-      const { error } = await supabase.from("makeup_likes").insert({
-        user_id: user.id,
-        post_id: postId,
-      });
+      const { error } = await (supabase as any).from("makeup_likes").insert([
+        {
+          user_id: user.id,
+          post_id: postId,
+        },
+      ]);
 
       if (error) {
         return {
@@ -387,10 +391,14 @@ export async function toggleFavorite(postId: string) {
       };
     } else {
       // 添加收藏
-      const { error } = await supabase.from("makeup_favorites").insert({
-        user_id: user.id,
-        post_id: postId,
-      });
+      const { error } = await (supabase as any)
+        .from("makeup_favorites")
+        .insert([
+          {
+            user_id: user.id,
+            post_id: postId,
+          },
+        ]);
 
       if (error) {
         return {
@@ -421,34 +429,50 @@ export async function getMakeupPostById(postId: string) {
   try {
     const supabase = await createClient();
 
+    // 首先检查 makeup_posts 表是否存在以及是否有数据
     const { data, error } = await supabase
       .from("makeup_posts")
-      .select(
-        `
-        *,
-        profiles:user_id (
-          id,
-          username,
-          avatar_url,
-          bio
-        )
-      `
-      )
+      .select("*")
       .eq("id", postId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("获取妆容详情失败:", error);
+      console.error("错误详情:", JSON.stringify(error, null, 2));
       return {
         success: false,
-        error: error.message,
+        error:
+          error.message ||
+          "数据库查询失败，请确保已执行 supabase-makeup-posts.sql 脚本创建表",
         data: null,
       };
     }
 
+    if (!data) {
+      console.error("未找到妆容帖子:", postId);
+      return {
+        success: false,
+        error: "未找到该妆容",
+        data: null,
+      };
+    }
+
+    // 获取作者信息
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id, username, avatar_url, bio")
+      .eq("id", (data as any).user_id)
+      .maybeSingle();
+
+    // 组合数据
+    const postWithProfile = {
+      ...(data as any),
+      profiles: profile,
+    };
+
     return {
       success: true,
-      data: data as MakeupPost,
+      data: postWithProfile as MakeupPost,
     };
   } catch (error) {
     console.error("获取妆容详情异常:", error);

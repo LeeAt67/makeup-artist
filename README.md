@@ -863,15 +863,53 @@ function Component() {
 }
 ```
 
+## 🔍 数据库状态检查
+
+如果遇到"表不存在"或数据查询错误，可以访问数据库状态检查工具：
+
+**检查工具页面：** `/test-db/check-tables`
+
+该页面会显示：
+
+- ✅ 所有数据表的存在状态
+- ✅ 每个表的记录数量
+- ✅ 当前登录用户信息
+- ✅ 详细的错误信息
+- ✅ 数据库设置指南
+
+**常见问题排查：**
+
+1. **表不存在** → 按顺序执行 SQL 脚本
+2. **表为空** → 执行示例数据脚本
+3. **权限错误** → 检查 RLS 策略
+4. **外键错误** → 执行修复脚本
+
 ## ⚠️ 已知问题和修复
 
-### makeup_posts 外键关系错误
+### 1. makeup_posts 外键关系错误
 
 **问题描述**：在查询 `makeup_posts` 表时出现外键关系找不到的错误。
 
 **修复方法**：在 Supabase SQL Editor 中执行 `supabase-fix-makeup-posts-fk.sql` 脚本。
 
 详细信息请查看：[修复 makeup_posts 外键问题](./docs/修复makeup_posts外键问题.md)
+
+### 2. 获取妆容详情失败
+
+**问题描述**：访问妆容详情页时提示"获取妆容详情失败"。
+
+**可能原因：**
+
+- `makeup_posts` 表未创建
+- 表中没有数据
+- 传入的 ID 不存在
+
+**解决方法：**
+
+1. 访问 `/test-db/check-tables` 检查表状态
+2. 确保已执行 `supabase-makeup-posts.sql` 脚本
+3. 执行 `supabase-insert-sample-data.sql` 添加示例数据
+4. 检查 URL 中的 ID 是否正确
 
 ## 🤝 贡献
 
