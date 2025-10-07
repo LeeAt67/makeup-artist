@@ -1,87 +1,21 @@
 import Link from "next/link";
 import { BottomNav } from "@/components/bottom-nav";
+import { getMakeupPosts, getFeaturedPost } from "@/lib/actions/makeup";
 
-// 模拟妆容数据
-const makeupPosts = [
-  {
-    id: 1,
-    title: "日系清透感妆容",
-    description: "清新自然的日系妆容，展现真实之美",
-    image:
-      "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=800&q=80",
-    author: {
-      name: "美妆达人A",
-      avatar: "https://i.pravatar.cc/150?img=1",
-    },
-    likes: 1200,
-    views: 1234,
-    featured: true,
-  },
-  {
-    id: 2,
-    title: "夏日海边妆容",
-    description: "清爽活力的夏日妆容",
-    image:
-      "https://images.unsplash.com/photo-1515688594390-b649af70d282?w=600&q=80",
-    author: {
-      name: "美妆达人A",
-      avatar: "https://i.pravatar.cc/150?img=1",
-    },
-    likes: 345,
-  },
-  {
-    id: 3,
-    title: "晚间约会妆容",
-    description: "浪漫温柔的约会妆",
-    image:
-      "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=600&q=80",
-    author: {
-      name: "化妆师B",
-      avatar: "https://i.pravatar.cc/150?img=2",
-    },
-    likes: 678,
-  },
-  {
-    id: 4,
-    title: "清新日常妆容",
-    description: "适合每天的自然妆",
-    image:
-      "https://images.unsplash.com/photo-1524502397800-2eeaad7c3fe5?w=600&q=80",
-    author: {
-      name: "小红",
-      avatar: "https://i.pravatar.cc/150?img=3",
-    },
-    likes: 912,
-  },
-  {
-    id: 5,
-    title: "活力运动妆容",
-    description: "持久不脱的运动妆",
-    image:
-      "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=600&q=80",
-    author: {
-      name: "美妆达人A",
-      avatar: "https://i.pravatar.cc/150?img=1",
-    },
-    likes: 1100,
-  },
-  {
-    id: 6,
-    title: "温柔约会妆容",
-    description: "展现温柔气质",
-    image:
-      "https://images.unsplash.com/photo-1499310392430-c4b28c6b6b53?w=600&q=80",
-    author: {
-      name: "化妆师B",
-      avatar: "https://i.pravatar.cc/150?img=2",
-    },
-    likes: 2300,
-  },
-];
+export default async function Home() {
+  // 从数据库获取真实数据
+  const [featuredResult, postsResult] = await Promise.all([
+    getFeaturedPost(),
+    getMakeupPosts(20),
+  ]);
 
-export default function Home() {
-  const featuredPost = makeupPosts.find((post) => post.featured);
-  const regularPosts = makeupPosts.filter((post) => !post.featured);
+  const featuredPost = featuredResult.data;
+  const allPosts = postsResult.data || [];
+  
+  // 如果有精选帖子，从列表中排除它
+  const regularPosts = featuredPost 
+    ? allPosts.filter((post) => post.id !== featuredPost.id)
+    : allPosts;
 
   return (
     <div className="flex flex-col min-h-screen justify-between">
@@ -128,7 +62,7 @@ export default function Home() {
             >
               <div
                 className="w-full bg-center bg-no-repeat aspect-video bg-cover"
-                style={{ backgroundImage: `url('${featuredPost.image}')` }}
+                style={{ backgroundImage: `url('${featuredPost.cover_image}')` }}
               />
               <div className="p-4">
                 <p className="text-lg font-bold text-content-light dark:text-content-dark">
@@ -138,12 +72,12 @@ export default function Home() {
                   {featuredPost.description}
                 </p>
                 <div className="flex items-center justify-between text-xs mt-2 text-subtle-light dark:text-subtle-dark">
-                  <span>{featuredPost.views}人已学</span>
+                  <span>{featuredPost.views_count}人已学</span>
                   <div className="flex items-center gap-1">
                     <span className="material-symbols-outlined text-sm">
                       favorite_border
                     </span>
-                    <span>{featuredPost.likes}</span>
+                    <span>{featuredPost.likes_count}</span>
                   </div>
                 </div>
               </div>
@@ -153,39 +87,56 @@ export default function Home() {
 
         {/* 妆容瀑布流 */}
         <section className="px-4 py-5">
-          <div className="grid grid-cols-2 gap-4">
-            {regularPosts.map((post) => (
-              <Link
-                key={post.id}
-                href={`/makeup/${post.id}`}
-                className="group flex flex-col gap-2 transition-all duration-200 ease-in-out"
-              >
-                <div
-                  className="w-full bg-center bg-no-repeat aspect-[4/5] bg-cover rounded-lg"
-                  style={{ backgroundImage: `url('${post.image}')` }}
-                />
-                <p className="text-content-light dark:text-content-dark text-sm font-medium">
-                  {post.title}
-                </p>
-                <div className="flex items-center text-xs text-subtle-light dark:text-subtle-dark gap-2">
-                  <div className="flex items-center gap-1">
-                    <img
-                      className="w-4 h-4 rounded-full object-cover"
-                      src={post.author.avatar}
-                      alt={post.author.name}
-                    />
-                    <span>{post.author.name}</span>
+          {regularPosts.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4">
+              {regularPosts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`/makeup/${post.id}`}
+                  className="group flex flex-col gap-2 transition-all duration-200 ease-in-out"
+                >
+                  <div
+                    className="w-full bg-center bg-no-repeat aspect-[4/5] bg-cover rounded-lg"
+                    style={{ backgroundImage: `url('${post.cover_image}')` }}
+                  />
+                  <p className="text-content-light dark:text-content-dark text-sm font-medium">
+                    {post.title}
+                  </p>
+                  <div className="flex items-center text-xs text-subtle-light dark:text-subtle-dark gap-2">
+                    <div className="flex items-center gap-1">
+                      <img
+                        className="w-4 h-4 rounded-full object-cover bg-gray-200"
+                        src={
+                          post.profiles?.avatar_url ||
+                          "https://i.pravatar.cc/150?img=1"
+                        }
+                        alt={post.profiles?.username || "用户"}
+                      />
+                      <span>{post.profiles?.username || "匿名用户"}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-sm">
+                        favorite_border
+                      </span>
+                      <span>{post.likes_count}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-sm">
-                      favorite_border
-                    </span>
-                    <span>{post.likes}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <span className="material-symbols-outlined text-6xl text-subtle-light dark:text-subtle-dark mb-4">
+                sentiment_dissatisfied
+              </span>
+              <p className="text-content-light dark:text-content-dark text-lg font-medium mb-2">
+                暂无妆容内容
+              </p>
+              <p className="text-subtle-light dark:text-subtle-dark text-sm">
+                快去数据库添加一些妆容帖子吧～
+              </p>
+            </div>
+          )}
         </section>
       </main>
 

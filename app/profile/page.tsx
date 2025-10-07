@@ -1,13 +1,8 @@
 import Link from "next/link";
 import { BottomNav } from "@/components/bottom-nav";
-
-// 模拟用户数据
-const userData = {
-  name: "Sophia",
-  avatar: "https://i.pravatar.cc/150?img=5",
-  bio: "一个热爱化妆的女孩",
-  role: "AI 化妆师",
-};
+import { createClient } from "@/lib/supabase/server";
+import { logout } from "@/lib/actions/auth";
+import { redirect } from "next/navigation";
 
 const quickActions = [
   { id: 1, icon: "history", label: "历史记录", href: "/profile/history" },
@@ -48,7 +43,37 @@ const userPosts = [
   },
 ];
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  // 获取用户资料
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  // 从邮箱中提取用户名（格式：username@app.local）
+  const username =
+    profile?.username || user.email?.replace("@app.local", "") || "用户";
+
+  const userData = {
+    name: username,
+    avatar:
+      profile?.avatar_url ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        username
+      )}&background=f04299&color=fff`,
+    username: username,
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow">
@@ -80,10 +105,7 @@ export default function ProfilePage() {
                 {userData.name}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {userData.role}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {userData.bio}
+                @{userData.username}
               </p>
             </div>
             <Link
@@ -110,6 +132,19 @@ export default function ProfilePage() {
                 </span>
               </Link>
             ))}
+          </div>
+
+          {/* 登出按钮 */}
+          <div className="mt-6">
+            <form action={logout}>
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-red-600 dark:text-red-400 font-medium"
+              >
+                <span className="material-symbols-outlined">logout</span>
+                <span>退出登录</span>
+              </button>
+            </form>
           </div>
         </div>
 
