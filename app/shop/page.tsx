@@ -2,9 +2,22 @@ import Link from "next/link";
 import { BottomNav } from "@/components/bottom-nav";
 import { getProducts } from "@/lib/actions/products";
 
-export default async function ShopPage() {
-  // 从数据库获取产品数据
-  const productsResult = await getProducts(undefined, undefined, 20);
+interface ShopPageProps {
+  searchParams: Promise<{
+    category?: string;
+  }>;
+}
+
+export default async function ShopPage({ searchParams }: ShopPageProps) {
+  const params = await searchParams;
+  const selectedCategory = params.category;
+
+  // 从数据库获取产品数据，根据分类筛选
+  const productsResult = await getProducts(
+    selectedCategory,
+    undefined,
+    50
+  );
   const products = productsResult.data || [];
 
   // 分类选项
@@ -49,7 +62,11 @@ export default async function ShopPage() {
           <nav className="-mb-px flex space-x-6 overflow-x-auto">
             <Link
               href="/shop"
-              className="shrink-0 border-b-2 border-primary text-primary px-1 py-3 text-sm font-bold"
+              className={`shrink-0 border-b-2 px-1 py-3 text-sm font-bold ${
+                !selectedCategory
+                  ? "border-primary text-primary"
+                  : "border-transparent text-stone-500 dark:text-stone-400 hover:text-primary dark:hover:text-primary hover:border-primary/50"
+              }`}
             >
               全部
             </Link>
@@ -57,7 +74,11 @@ export default async function ShopPage() {
               <Link
                 key={category.id}
                 href={`/shop?category=${category.id}`}
-                className="shrink-0 border-b-2 border-transparent text-stone-500 dark:text-stone-400 hover:text-primary dark:hover:text-primary hover:border-primary/50 px-1 py-3 text-sm font-bold"
+                className={`shrink-0 border-b-2 px-1 py-3 text-sm font-bold ${
+                  selectedCategory === category.id
+                    ? "border-primary text-primary"
+                    : "border-transparent text-stone-500 dark:text-stone-400 hover:text-primary dark:hover:text-primary hover:border-primary/50"
+                }`}
               >
                 {category.name}
               </Link>

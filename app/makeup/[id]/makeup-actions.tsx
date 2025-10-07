@@ -121,7 +121,9 @@ export function MakeupActions({
                 ? "text-primary"
                 : "text-subtle-light dark:text-subtle-dark"
             }`}
-            style={{ fontVariationSettings: liked ? "'FILL' 1" : "'FILL' 0" }}
+            style={{ 
+              fontVariationSettings: liked ? "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" : "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" 
+            }}
           >
             favorite
           </span>
@@ -156,7 +158,9 @@ export function MakeupActions({
                 : "text-subtle-light dark:text-subtle-dark"
             }`}
             style={{
-              fontVariationSettings: favorited ? "'FILL' 1" : "'FILL' 0",
+              fontVariationSettings: favorited 
+                ? "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" 
+                : "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24",
             }}
           >
             star

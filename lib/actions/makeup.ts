@@ -557,3 +557,36 @@ export async function checkUserFavorited(postId: string) {
     };
   }
 }
+
+/**
+ * 批量获取帖子的点赞状态
+ */
+export async function getPostsLikeStatus(postIds: string[]) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user || postIds.length === 0) {
+      return {};
+    }
+
+    const { data } = await supabase
+      .from("makeup_likes")
+      .select("post_id")
+      .eq("user_id", user.id)
+      .in("post_id", postIds);
+
+    // 转换为 Map 方便查询
+    const likedPostsMap: Record<string, boolean> = {};
+    data?.forEach((like) => {
+      likedPostsMap[like.post_id] = true;
+    });
+
+    return likedPostsMap;
+  } catch (error) {
+    return {};
+  }
+}

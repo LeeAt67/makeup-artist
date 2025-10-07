@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { MakeupPost } from "./makeup";
+import type { Product } from "./products";
 
 /**
  * 搜索妆容帖子
@@ -189,6 +190,85 @@ export async function getSearchSuggestions(query: string, limit = 5) {
       success: false,
       error: error instanceof Error ? error.message : "未知错误",
       data: [],
+    };
+  }
+}
+
+/**
+ * 综合搜索（妆容+产品）
+ * @param query 搜索关键词
+ * @param type 搜索类型：makeup, product, all
+ * @param limit 限制数量
+ */
+export async function searchAll(
+  query: string,
+  type: "makeup" | "product" | "all" = "all",
+  limit = 20
+) {
+  try {
+    const supabase = await createClient();
+
+    const results: {
+      makeupPosts: MakeupPost[];
+      products: Product[];
+    } = {
+      makeupPosts: [],
+      products: [],
+    };
+
+    // 搜索妆容
+    if (type === "makeup" || type === "all") {
+      const { data: makeupData } = await supabase
+        .from("makeup_posts")
+        .select(
+          `
+          *,
+          profiles:user_id (
+            id,
+            username,
+            avatar_url
+          )
+        `
+        )
+        .eq("status", "published")
+        .or(`title.ilike.%${query}%,description.ilike.%${query}%,tags.cs.{${query}}`)
+        .order("views_count", { ascending: false })
+        .limit(limit);
+
+      if (makeupData) {
+        results.makeupPosts = makeupData as MakeupPost[];
+      }
+    }
+
+    // 搜索产品
+    if (type === "product" || type === "all") {
+      const { data: productData } = await supabase
+        .from("products")
+        .select("*")
+        .eq("status", "published")
+        .eq("is_available", true)
+        .or(`name.ilike.%${query}%,brand.ilike.%${query}%,description.ilike.%${query}%`)
+        .order("sales_count", { ascending: false })
+        .limit(limit);
+
+      if (productData) {
+        results.products = productData as Product[];
+      }
+    }
+
+    return {
+      success: true,
+      data: results,
+    };
+  } catch (error) {
+    console.error("综合搜索异常:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "未知错误",
+      data: {
+        makeupPosts: [],
+        products: [],
+      },
     };
   }
 }

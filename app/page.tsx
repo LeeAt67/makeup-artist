@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { BottomNav } from "@/components/bottom-nav";
-import { getMakeupPosts, getFeaturedPost } from "@/lib/actions/makeup";
+import {
+  getMakeupPosts,
+  getFeaturedPost,
+  getPostsLikeStatus,
+} from "@/lib/actions/makeup";
+import { PostCardActions } from "@/app/components/post-card-actions";
 
 export default async function Home() {
   // 从数据库获取真实数据
@@ -16,6 +21,10 @@ export default async function Home() {
   const regularPosts = featuredPost
     ? allPosts.filter((post) => post.id !== featuredPost.id)
     : allPosts;
+
+  // 获取所有帖子的点赞状态
+  const postIds = regularPosts.map((post) => post.id);
+  const likedPostsMap = await getPostsLikeStatus(postIds);
 
   return (
     <div className="flex flex-col min-h-screen justify-between">
@@ -104,7 +113,7 @@ export default async function Home() {
                   <p className="text-content-light dark:text-content-dark text-sm font-medium">
                     {post.title}
                   </p>
-                  <div className="flex items-center text-xs text-subtle-light dark:text-subtle-dark gap-2">
+                  <div className="flex items-center justify-between text-xs text-subtle-light dark:text-subtle-dark">
                     <div className="flex items-center gap-1">
                       <img
                         className="w-4 h-4 rounded-full object-cover bg-gray-200"
@@ -116,12 +125,11 @@ export default async function Home() {
                       />
                       <span>{post.profiles?.username || "匿名用户"}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm">
-                        favorite_border
-                      </span>
-                      <span>{post.likes_count}</span>
-                    </div>
+                    <PostCardActions
+                      postId={post.id}
+                      initialLiked={!!likedPostsMap[post.id]}
+                      initialLikesCount={post.likes_count}
+                    />
                   </div>
                 </Link>
               ))}

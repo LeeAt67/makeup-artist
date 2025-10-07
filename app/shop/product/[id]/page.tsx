@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getProductById } from "@/lib/actions/products";
+import { getProductById, getProductReviews } from "@/lib/actions/products";
+import { ProductReviews } from "./product-reviews";
 
 interface ProductDetailPageProps {
   params: Promise<{
@@ -21,6 +22,10 @@ export default async function ProductDetailPage({
   }
 
   const product = result.data;
+
+  // 获取产品评价
+  const reviewsResult = await getProductReviews(id, 50);
+  const reviews = reviewsResult.data || [];
 
   // 计算折扣
   const discount =
@@ -265,6 +270,14 @@ export default async function ProductDetailPage({
           </p>
         </section>
       )}
+
+      {/* 用户评价 */}
+      <ProductReviews
+        reviews={reviews}
+        productId={id}
+        averageRating={product.rating}
+        totalReviews={product.reviews_count}
+      />
 
       {/* 底部购买栏 */}
       <div className="fixed bottom-0 left-0 right-0 bg-surface-light dark:bg-surface-dark border-t border-gray-200 dark:border-gray-700 px-4 py-3 z-10">
