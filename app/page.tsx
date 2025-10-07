@@ -11,9 +11,9 @@ export default async function Home() {
 
   const featuredPost = featuredResult.data;
   const allPosts = postsResult.data || [];
-  
+
   // 如果有精选帖子，从列表中排除它
-  const regularPosts = featuredPost 
+  const regularPosts = featuredPost
     ? allPosts.filter((post) => post.id !== featuredPost.id)
     : allPosts;
 
@@ -62,7 +62,9 @@ export default async function Home() {
             >
               <div
                 className="w-full bg-center bg-no-repeat aspect-video bg-cover"
-                style={{ backgroundImage: `url('${featuredPost.cover_image}')` }}
+                style={{
+                  backgroundImage: `url('${featuredPost.cover_image}')`,
+                }}
               />
               <div className="p-4">
                 <p className="text-lg font-bold text-content-light dark:text-content-dark">

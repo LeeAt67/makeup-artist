@@ -48,10 +48,10 @@ export default function EditProfilePage() {
     skin_tone: "#FDEFE2",
   });
 
-  const supabase = createClient();
-
   // 加载用户资料
   useEffect(() => {
+    const supabase = createClient();
+
     async function loadProfile() {
       try {
         const {
@@ -104,7 +104,7 @@ export default function EditProfilePage() {
     }
 
     loadProfile();
-  }, [router, supabase]);
+  }, [router]);
 
   // 处理头像上传
   async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -113,6 +113,7 @@ export default function EditProfilePage() {
 
     try {
       setUploading(true);
+      const supabase = createClient();
 
       // 检查文件类型
       if (!file.type.startsWith("image/")) {
@@ -176,6 +177,7 @@ export default function EditProfilePage() {
 
     try {
       setSaving(true);
+      const supabase = createClient();
 
       const { error } = await (supabase.from("profiles") as any).upsert({
         id: userId,

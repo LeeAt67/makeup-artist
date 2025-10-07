@@ -40,9 +40,7 @@ export default async function ShopPage() {
                 search
               </span>
             </div>
-            <span className="text-stone-500 dark:text-stone-400">
-              搜索商品
-            </span>
+            <span className="text-stone-500 dark:text-stone-400">搜索商品</span>
           </Link>
         </div>
 
@@ -94,11 +92,12 @@ export default async function ShopPage() {
                     <p className="text-primary font-bold text-lg">
                       ¥{product.price}
                     </p>
-                    {product.original_price && product.original_price > product.price && (
-                      <p className="text-xs text-stone-400 dark:text-stone-500 line-through">
-                        ¥{product.original_price}
-                      </p>
-                    )}
+                    {product.original_price &&
+                      product.original_price > product.price && (
+                        <p className="text-xs text-stone-400 dark:text-stone-500 line-through">
+                          ¥{product.original_price}
+                        </p>
+                      )}
                   </div>
                   {product.rating > 0 && (
                     <div className="flex items-center gap-1 text-xs">
