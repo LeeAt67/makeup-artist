@@ -302,8 +302,7 @@ export async function toggleCommentLike(commentId: string) {
     }
 
     // 检查是否已点赞
-    const { data: existingLike } = await supabase
-      .from("comment_likes")
+    const { data: existingLike } = await (supabase.from("comment_likes") as any)
       .select("id")
       .eq("user_id", user.id)
       .eq("comment_id", commentId)
@@ -311,8 +310,7 @@ export async function toggleCommentLike(commentId: string) {
 
     if (existingLike) {
       // 取消点赞
-      const { error } = await supabase
-        .from("comment_likes")
+      const { error } = await (supabase.from("comment_likes") as any)
         .delete()
         .eq("user_id", user.id)
         .eq("comment_id", commentId);
@@ -330,7 +328,7 @@ export async function toggleCommentLike(commentId: string) {
       };
     } else {
       // 添加点赞
-      const { error } = await supabase.from("comment_likes").insert({
+      const { error } = await (supabase.from("comment_likes") as any).insert({
         user_id: user.id,
         comment_id: commentId,
       });

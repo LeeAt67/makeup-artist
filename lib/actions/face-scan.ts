@@ -264,9 +264,7 @@ export async function deleteFaceScan(scanId: string) {
     }
 
     // 获取记录详情
-    // @ts-ignore - Supabase 类型定义暂未包含 face_scans 表
-    const { data: scan } = await supabase
-      .from("face_scans")
+    const { data: scan } = await (supabase.from("face_scans") as any)
       .select("image_url")
       .eq("id", scanId)
       .eq("user_id", user.id)
@@ -280,9 +278,7 @@ export async function deleteFaceScan(scanId: string) {
     }
 
     // 删除数据库记录
-    // @ts-ignore - Supabase 类型定义暂未包含 face_scans 表
-    const { error: deleteError } = await supabase
-      .from("face_scans")
+    const { error: deleteError } = await (supabase.from("face_scans") as any)
       .delete()
       .eq("id", scanId)
       .eq("user_id", user.id);

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface TestResult {
   success: boolean;
@@ -210,9 +211,9 @@ export default function TestDatabasePage() {
               >
                 → Supabase Dashboard
               </a>
-              <a href="/" className="block text-primary hover:underline">
+              <Link href="/" className="block text-primary hover:underline">
                 → 返回首页
-              </a>
+              </Link>
             </div>
           </div>
         </div>

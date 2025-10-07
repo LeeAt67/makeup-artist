@@ -3,9 +3,9 @@
 import { login } from "@/lib/actions/auth";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 
-export default function LoginPage() {
+function LoginForm() {
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
@@ -151,5 +151,19 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          加载中...
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

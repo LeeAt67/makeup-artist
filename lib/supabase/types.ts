@@ -27,9 +27,10 @@ export interface Database {
           created_at: string;
           updated_at: string;
           username: string | null;
+          bio: string | null;
           avatar_url: string | null;
-          skin_type: "dry" | "oily" | "combination" | "normal" | null;
-          skin_tone: "cool" | "warm" | "neutral" | null;
+          skin_type: "dry" | "oily" | "combination" | "sensitive" | null;
+          skin_tone: string | null;
           face_shape:
             | "round"
             | "square"
@@ -44,9 +45,10 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           username?: string | null;
+          bio?: string | null;
           avatar_url?: string | null;
-          skin_type?: "dry" | "oily" | "combination" | "normal" | null;
-          skin_tone?: "cool" | "warm" | "neutral" | null;
+          skin_type?: "dry" | "oily" | "combination" | "sensitive" | null;
+          skin_tone?: string | null;
           face_shape?:
             | "round"
             | "square"
@@ -61,9 +63,10 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           username?: string | null;
+          bio?: string | null;
           avatar_url?: string | null;
-          skin_type?: "dry" | "oily" | "combination" | "normal" | null;
-          skin_tone?: "cool" | "warm" | "neutral" | null;
+          skin_type?: "dry" | "oily" | "combination" | "sensitive" | null;
+          skin_tone?: string | null;
           face_shape?:
             | "round"
             | "square"
@@ -206,8 +209,7 @@ export interface Database {
         | "long"
         | "heart"
         | "diamond";
-      skin_type: "dry" | "oily" | "combination" | "normal";
-      skin_tone: "cool" | "warm" | "neutral";
+      skin_type: "dry" | "oily" | "combination" | "sensitive";
       difficulty_level: "beginner" | "intermediate" | "advanced";
     };
     CompositeTypes: {

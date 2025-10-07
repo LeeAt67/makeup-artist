@@ -133,7 +133,7 @@ export async function signup(formData: FormData) {
 
   // 在 profiles 表中存储用户名
   if (data.user) {
-    await supabase.from("profiles").upsert({
+    await (supabase.from("profiles") as any).upsert({
       id: data.user.id,
       username: username,
       updated_at: new Date().toISOString(),

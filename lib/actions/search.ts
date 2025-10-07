@@ -86,8 +86,7 @@ export async function getHotSearchKeywords(limit = 10) {
     const supabase = await createClient();
 
     // 从标签中统计热门关键词
-    const { data, error } = await supabase
-      .from("makeup_posts")
+    const { data, error } = await (supabase.from("makeup_posts") as any)
       .select("tags")
       .eq("status", "published")
       .not("tags", "is", null)
@@ -104,7 +103,7 @@ export async function getHotSearchKeywords(limit = 10) {
 
     // 统计标签频率
     const tagCounts: Record<string, number> = {};
-    data.forEach((post) => {
+    data.forEach((post: any) => {
       if (post.tags && Array.isArray(post.tags)) {
         post.tags.forEach((tag: string) => {
           tagCounts[tag] = (tagCounts[tag] || 0) + 1;
@@ -148,8 +147,7 @@ export async function getSearchSuggestions(query: string, limit = 5) {
 
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from("makeup_posts")
+    const { data, error } = await (supabase.from("makeup_posts") as any)
       .select("title, tags")
       .eq("status", "published")
       .or(`title.ilike.%${query}%,tags.cs.{${query}}`)
@@ -166,7 +164,7 @@ export async function getSearchSuggestions(query: string, limit = 5) {
 
     // 提取建议
     const suggestions = new Set<string>();
-    data.forEach((post) => {
+    data.forEach((post: any) => {
       // 添加标题匹配的部分
       if (post.title.toLowerCase().includes(query.toLowerCase())) {
         suggestions.add(post.title);
@@ -194,4 +192,3 @@ export async function getSearchSuggestions(query: string, limit = 5) {
     };
   }
 }
-

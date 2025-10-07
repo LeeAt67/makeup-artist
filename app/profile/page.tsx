@@ -54,8 +54,7 @@ export default async function ProfilePage() {
   }
 
   // 获取用户资料
-  const { data: profile } = await supabase
-    .from("profiles")
+  const { data: profile } = await (supabase.from("profiles") as any)
     .select("*")
     .eq("id", user.id)
     .single();

@@ -3,6 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import type { Database } from "@/lib/supabase/types";
+
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 const skinTypes = [
   { value: "oily", label: "油性" },
@@ -66,7 +69,7 @@ export default function EditProfilePage() {
           .from("profiles")
           .select("*")
           .eq("id", user.id)
-          .single();
+          .single<Profile>();
 
         if (error && error.code !== "PGRST116") {
           console.error("加载资料失败:", error);
@@ -174,7 +177,7 @@ export default function EditProfilePage() {
     try {
       setSaving(true);
 
-      const { error } = await supabase.from("profiles").upsert({
+      const { error } = await (supabase.from("profiles") as any).upsert({
         id: userId,
         username: formData.username.trim(),
         bio: formData.bio.trim(),
